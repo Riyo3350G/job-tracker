@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/auth.routes");
+const jobRoutes = require("./routes/job.routes");
 require("dotenv").config();
 
 const pool = require("./config/db");
@@ -16,5 +17,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/jobs", jobRoutes);
 
 module.exports = app;
