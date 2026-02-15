@@ -31,8 +31,35 @@ const addJob = async (req, res) => {
 
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await getJobsByUserId(req.user.id);
-    res.json(jobs);
+    const { status, page = 1, limit = 5 } = req.query;
+
+    // Convert to numbers safely
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+
+    if (
+      !Number.isInteger(pageNum) ||
+      pageNum <= 0 ||
+      !Number.isInteger(limitNum) ||
+      limitNum <= 0
+    ) {
+      return res.status(400).json({ message: "Invalid page or limit values" });
+    }
+
+    const offset = (pageNum - 1) * limitNum;
+
+    const jobs = await getJobsByUserId(
+      req.user.id,
+      status || null, // ← this line is important
+      limitNum,
+      offset,
+    );
+
+    res.json({
+      page: pageNum,
+      limit: limitNum,
+      results: jobs,
+    });
   } catch (error) {
     console.error("Error fetching jobs:", error);
     res.status(500).json({ message: "Server error" });
