@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "./App.css";
 
 const API = "http://localhost:5000";
 
@@ -57,47 +58,103 @@ function App() {
     fetchJobs();
   };
 
+  const deleteJob = async (id) => {
+    await fetch(`${API}/jobs/delete_job/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchJobs();
+  };
+
+  const updateStatus = async (job) => {
+    const newStatus =
+      job.status === "Applied"
+        ? "Interviewing"
+        : job.status === "Interviewing"
+          ? "Rejected"
+          : "Applied";
+
+    await fetch(`${API}/jobs/update_job/${job.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: job.title,
+        company: job.company,
+        status: newStatus,
+        notes: job.notes || "",
+      }),
+    });
+    fetchJobs();
+  };
+
   if (!token) {
     return (
-      <div style={{ padding: 20 }}>
-        <h2>Login / Register</h2>
-        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-        <br />
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <button onClick={register}>Register</button>
-        <button onClick={login}>Login</button>
+      <div className="container">
+        <div className="card">
+          <h2>Login / Register</h2>
+
+          <input
+            placeholder="Email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <div>
+            <button className="success" onClick={register}>
+              Register
+            </button>
+            <button className="primary" onClick={login}>
+              Login
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="container">
       <h2>Job Tracker Dashboard</h2>
 
-      <input
-        placeholder="Job Title"
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <input
-        placeholder="Company"
-        onChange={(e) => setCompany(e.target.value)}
-      />
-      <button onClick={addJob}>Add Job</button>
+      <div className="card">
+        <input
+          placeholder="Job Title"
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          placeholder="Company"
+          onChange={(e) => setCompany(e.target.value)}
+        />
+        <button className="primary" onClick={addJob}>
+          Add Job
+        </button>
+      </div>
 
-      <ul>
-        {jobs.map((job) => (
-          <li key={job.id}>
-            {job.title} - {job.company} ({job.status})
-          </li>
-        ))}
-      </ul>
+      {jobs.map((job) => (
+        <div key={job.id} className="card">
+          <h4>{job.title}</h4>
+          <p>{job.company}</p>
+          <p>Status: {job.status}</p>
+
+          <button className="success" onClick={() => updateStatus(job)}>
+            Change Status
+          </button>
+
+          <button className="danger" onClick={() => deleteJob(job.id)}>
+            Delete
+          </button>
+        </div>
+      ))}
 
       <button
+        className="danger"
         onClick={() => {
           localStorage.removeItem("token");
           setToken(null);
