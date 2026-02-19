@@ -1,49 +1,121 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
+  font-family: "Inter", sans-serif;
+  background: #f4f6f8;
+  color: #333;
 }
 
 .container {
-  max-width: 800px;
-  margin: auto;
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #1f2937;
+  color: white;
   padding: 20px;
+}
+
+.sidebar h2 {
+  margin: 0 0 20px 0;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.main {
+  flex: 1;
+  padding: 30px;
 }
 
 .card {
   background: white;
-  padding: 15px;
-  margin-top: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.card h4 {
+  margin: 0 0 10px 0;
 }
 
 input {
-  padding: 8px;
-  margin: 5px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 8px 12px;
-  margin: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 10px;
+  margin-right: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
 }
 
 button.primary {
-  background-color: #007bff;
+  background: #3b82f6;
   color: white;
-}
-
-button.danger {
-  background-color: #dc3545;
-  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 button.success {
-  background-color: #28a745;
+  background: #10b981;
   color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button.danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status.Applied {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status.Interview {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.Rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-box {
+  flex: 1;
+  text-align: center;
 }
