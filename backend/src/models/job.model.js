@@ -8,50 +8,57 @@ const createJob = async (title, company, status, notes, user_id) => {
   return result.rows[0];
 };
 
-const getJobsByUserId = async (user_id, status, limit, offset) => {
+const getJobsByUserId = async (
+  user_id,
+  status,
+  search,
+  sort,
+  limit,
+  offset,
+) => {
   let query = "SELECT * FROM jobs WHERE user_id = $1";
-  const params = [user_id];
+  let values = [user_id];
+  let index = 2;
 
-  let nextPlaceholder = 2; // keeps track of next $n
-
-  // Status filter — only if meaningful value is provided
-  if (status && typeof status === "string" && status.trim() !== "") {
-    query += ` AND status = $${nextPlaceholder}`;
-    params.push(status.trim());
-    nextPlaceholder++;
+  if (status) {
+    query += ` AND status = $${index++}`;
+    values.push(status);
   }
 
-  query += " ORDER BY created_at DESC";
-
-  // LIMIT — only if it's a valid positive number
-  if (typeof limit === "number" && limit > 0 && Number.isInteger(limit)) {
-    query += ` LIMIT $${nextPlaceholder}`;
-    params.push(limit);
-    nextPlaceholder++;
+  if (search) {
+    query += ` AND (LOWER(title) LIKE $${index} OR LOWER(company) LIKE $${index})`;
+    values.push(`%${search.toLowerCase()}%`);
+    index++;
   }
 
-  // OFFSET — only if it's a valid non-negative integer
-  if (typeof offset === "number" && offset >= 0 && Number.isInteger(offset)) {
-    query += ` OFFSET $${nextPlaceholder}`;
-    params.push(offset);
-    nextPlaceholder++;
+  query += " ORDER BY ";
+
+  if (sort === "company") {
+    query += "company ASC";
+  } else {
+    query += "created_at DESC";
   }
 
-  console.log("→ Executing query:", query);
-  console.log("→ With params:", params);
+  query += ` LIMIT $${index++}`;
+  values.push(limit);
 
-  try {
-    const result = await pool.query(query, params);
-    return result.rows;
-  } catch (err) {
-    console.error("Database query failed:", {
-      query,
-      params,
-      error: err.message,
-      code: err.code,
-    });
-    throw err;
-  }
+  query += ` OFFSET $${index}`;
+  values.push(offset);
+
+  const result = await pool.query(query, values);
+  return result.rows;
+};
+
+const getJobStats = async (user_id) => {
+  const result = await pool.query(
+    `SELECT 
+      COUNT(*) FILTER (WHERE status = 'Applied') AS applied,
+      COUNT(*) FILTER (WHERE status = 'Interview') AS interview,
+      COUNT(*) FILTER (WHERE status = 'Rejected') AS rejected
+     FROM jobs WHERE user_id = $1`,
+    [user_id],
+  );
+  return result.rows[0];
 };
 
 const updateJob = async (id, title, company, status, notes, user_id) => {
@@ -75,4 +82,5 @@ module.exports = {
   getJobsByUserId,
   updateJob,
   deleteJob,
+  getJobStats,
 };

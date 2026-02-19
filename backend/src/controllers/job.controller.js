@@ -3,9 +3,16 @@ const {
   getJobsByUserId,
   updateJob,
   deleteJob,
+  getJobStats,
 } = require("../models/job.model");
+const jobSchema = require("../validation/job.validation");
 
 const addJob = async (req, res) => {
+  const { error } = jobSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
     const { title, company, status, notes } = req.body;
 
@@ -31,42 +38,43 @@ const addJob = async (req, res) => {
 
 const getAllJobs = async (req, res) => {
   try {
-    const { status, page = 1, limit = 5 } = req.query;
+    const { status, search, sort, page = 1, limit = 5 } = req.query;
 
-    // Convert to numbers safely
-    const pageNum = Number(page);
-    const limitNum = Number(limit);
-
-    if (
-      !Number.isInteger(pageNum) ||
-      pageNum <= 0 ||
-      !Number.isInteger(limitNum) ||
-      limitNum <= 0
-    ) {
-      return res.status(400).json({ message: "Invalid page or limit values" });
-    }
-
-    const offset = (pageNum - 1) * limitNum;
+    const offset = (page - 1) * limit;
 
     const jobs = await getJobsByUserId(
       req.user.id,
-      status || null, // ← this line is important
-      limitNum,
-      offset,
+      status,
+      search,
+      sort,
+      parseInt(limit),
+      parseInt(offset),
     );
 
     res.json({
-      page: pageNum,
-      limit: limitNum,
+      page: parseInt(page),
+      limit: parseInt(limit),
       results: jobs,
     });
   } catch (error) {
-    console.error("Error fetching jobs:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const stats = async (req, res) => {
+  try {
+    const data = await getJobStats(req.user.id);
+    res.json(data);
+  } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const update = async (req, res) => {
+  const { error } = jobSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
   try {
     const { id } = req.params;
     const { title, company, status, notes } = req.body;
@@ -118,4 +126,5 @@ module.exports = {
   getAllJobs,
   update,
   remove,
+  stats,
 };
