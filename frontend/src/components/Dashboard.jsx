@@ -4,7 +4,7 @@ import JobCard from "./JobCard";
 import JobForm from "./JobForm";
 import StatsChart from "./StatsChart";
 
-const API = "http://localhost:5000";
+const API = "https://job-tracker-production-e46b.up.railway.app";
 
 function Dashboard({ token, logout }) {
   const [jobs, setJobs] = useState([]);
